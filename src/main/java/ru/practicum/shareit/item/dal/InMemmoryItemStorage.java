@@ -34,8 +34,9 @@ public class InMemmoryItemStorage implements ItemStorage {
     public Collection<Item> getAllItemsByText(String text) {
         return items.values()
                 .stream()
-                .filter(item -> (StringUtils.containsIgnoreCase(item.getName(), text)
-                        || StringUtils.containsIgnoreCase(item.getDescription(), text)) && item.isAvailable())
+                .filter(Item::isAvailable)
+                .filter(item -> StringUtils.containsIgnoreCase(item.getName(), text)
+                        || StringUtils.containsIgnoreCase(item.getDescription(), text))
                 .collect(Collectors.toList());
     }
 

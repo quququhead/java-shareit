@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.item.dal.interfaces.ItemStorage;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
@@ -26,8 +28,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Collection<ItemDto> findAllItemsOfUser(long userId) {
-        User owner = userStorage.getUser(userId)
-                .orElseThrow(() -> new NoSuchElementException("User " + userId + " was not found!"));
+        log.debug("findAllItemsOfUser {}", userId);
+        User owner = receiveUser(userId);
         return itemStorage.getAllItemsOfOwner(owner)
                 .stream()
                 .map(ItemMapper::mapToItemDto)
@@ -36,12 +38,13 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto findItem(long itemId) {
-        return ItemMapper.mapToItemDto(itemStorage.getItem(itemId)
-                .orElseThrow(() -> new NoSuchElementException("Item " + itemId + " was not found!")));
+        log.debug("findItem {}", itemId);
+        return ItemMapper.mapToItemDto(receiveItem(itemId));
     }
 
     @Override
     public Collection<ItemDto> findItemByText(String text) {
+        log.debug("findItemByText {}", text);
         if (text.isBlank()) {
             return List.of();
         }
@@ -53,21 +56,30 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto createItem(long userId, NewItemRequest itemRequest) {
-        User user = userStorage.getUser(userId)
-                .orElseThrow(() -> new NoSuchElementException("User " + userId + " was not found!"));
+        log.debug("{} createItem {}", userId, itemRequest);
+        User user = receiveUser(userId);
         Item item = ItemMapper.mapToItem(user, itemRequest);
         return ItemMapper.mapToItemDto(itemStorage.addItem(item));
     }
 
     @Override
     public ItemDto updateItem(long userId, long itemId, UpdateItemRequest itemRequest) {
-        User user = userStorage.getUser(userId)
-                .orElseThrow(() -> new NoSuchElementException("User " + userId + " was not found!"));
-        Item item = itemStorage.getItem(itemId)
-                .orElseThrow(() -> new NoSuchElementException("Item " + itemId + " was not found!"));
+        log.debug("{} updateItem {}, {}", userId, itemId, itemRequest);
+        User user = receiveUser(userId);
+        Item item = receiveItem(itemId);
         if (!item.getOwner().equals(user)) {
             throw new NoSuchElementException("You do not have such permission!");
         }
         return ItemMapper.mapToItemDto(ItemMapper.updateItemFields(item, itemRequest));
+    }
+
+    private Item receiveItem(long itemId) {
+        return itemStorage.getItem(itemId)
+                .orElseThrow(() -> new NoSuchElementException("Item " + itemId + " was not found!"));
+    }
+
+    private User receiveUser(long userId) {
+        return userStorage.getUser(userId)
+                .orElseThrow(() -> new NoSuchElementException("User " + userId + " was not found!"));
     }
 }

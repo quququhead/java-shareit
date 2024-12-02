@@ -11,5 +11,5 @@ public interface UserStorage {
 
     void removeUser(long id);
 
-    boolean isEmailNotUnique(User user);
+    boolean isEmailAlreadyExist(User user);
 }

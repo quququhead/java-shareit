@@ -31,7 +31,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public boolean isEmailNotUnique(User user) {
+    public boolean isEmailAlreadyExist(User user) {
         return users.containsValue(user);
     }
 
