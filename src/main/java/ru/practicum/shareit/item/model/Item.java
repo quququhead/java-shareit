@@ -11,7 +11,9 @@ import java.util.List;
 
 @Entity
 @Table(name = "items")
-@Getter @Setter @ToString
+@Getter
+@Setter
+@ToString
 public class Item {
 
     @Id
@@ -38,6 +40,7 @@ public class Item {
         comments.add(comment);
         comment.setItem(this);
     }
+
     public void removeComment(Comment comment) {
         comments.remove(comment);
         comment.setItem(null);
