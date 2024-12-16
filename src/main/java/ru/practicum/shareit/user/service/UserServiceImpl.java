@@ -3,7 +3,7 @@ package ru.practicum.shareit.user.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.user.dal.interfaces.UserStorage;
+import ru.practicum.shareit.user.dal.UserRepository;
 import ru.practicum.shareit.user.dto.NewUserRequest;
 import ru.practicum.shareit.user.dto.UpdateUserRequest;
 import ru.practicum.shareit.user.dto.UserDto;
@@ -18,7 +18,7 @@ import java.util.NoSuchElementException;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private final UserStorage userStorage;
+    private final UserRepository userRepository;
 
     @Override
     public UserDto findUser(long userId) {
@@ -29,33 +29,23 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto createUser(NewUserRequest userRequest) {
         log.debug("createUser {}", userRequest);
-        User user = UserMapper.mapToUser(userRequest);
-        if (userStorage.isEmailAlreadyExist(user)) {
-            throw new IllegalArgumentException("Email (" + user.getEmail() + ") is already in use!");
-        }
-        return UserMapper.mapToUserDto(userStorage.addUser(user));
+        return UserMapper.mapToUserDto(userRepository.save(UserMapper.mapToUser(userRequest)));
     }
 
     @Override
     public UserDto updateUser(long userId, UpdateUserRequest userRequest) {
         log.debug("{} updateUser {}", userId, userRequest);
-        User user = receiveUser(userId);
-        if (userStorage.isEmailAlreadyExist(UserMapper.mapToUser(userRequest))) {
-            if (!user.getEmail().equals(userRequest.getEmail())) {
-                throw new IllegalArgumentException("Email (" + userRequest.getEmail() + ") is already in use!");
-            }
-        }
-        return UserMapper.mapToUserDto(UserMapper.updateUserFields(user, userRequest));
+        return UserMapper.mapToUserDto(userRepository.save(UserMapper.updateUserFields(receiveUser(userId), userRequest)));
     }
 
     @Override
     public void deleteUser(long userId) {
         log.debug("deleteUser {}", userId);
-        userStorage.removeUser(userId);
+        userRepository.deleteById(userId);
     }
 
     private User receiveUser(long userId) {
-        return userStorage.getUser(userId)
+        return userRepository.findById(userId)
                 .orElseThrow(() -> new NoSuchElementException("User " + userId + " was not found!"));
     }
 }
