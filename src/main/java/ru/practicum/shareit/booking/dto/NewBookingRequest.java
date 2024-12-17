@@ -1,5 +1,6 @@
 package ru.practicum.shareit.booking.dto;
 
+import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -17,6 +18,6 @@ public class NewBookingRequest {
     private LocalDateTime start;
 
     @NotNull(message = "End cannot be null!")
-    @FutureOrPresent(message = "End cannot be in the past!")
+    @Future(message = "End cannot be in the past!")
     private LocalDateTime end;
 }

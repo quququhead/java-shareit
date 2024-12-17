@@ -45,9 +45,12 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto findItem(long itemId) {
+    public ItemWithDatesDto findItem(long itemId) {
         log.debug("findItem {}", itemId);
-        return ItemMapper.mapToItemDto(receiveItem(itemId));
+        LocalDateTime now = LocalDateTime.now();
+        Booking lastBooking = bookingRepository.findFirstByItemIdAndStatusAndStartAfterOrderByStartDesc(itemId, BookingStatus.APPROVED, now);
+        Booking nextBooking = bookingRepository.findFirstByItemIdAndStatusAndStartAfterOrderByStart(itemId, BookingStatus.APPROVED, now);
+        return ItemMapper.mapToItemWithDatesDto(receiveItem(itemId), lastBooking, nextBooking);
     }
 
     @Override
