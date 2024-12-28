@@ -1,5 +1,6 @@
 package ru.practicum.shareit.exception;
 
+import jakarta.validation.ValidationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -10,10 +11,10 @@ import java.util.NoSuchElementException;
 
 @RestControllerAdvice
 public class ErrorHandler {
-    @ExceptionHandler({ MethodArgumentNotValidException.class })
+    @ExceptionHandler({ MethodArgumentNotValidException.class, ValidationException.class })
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse handleValidationException(final Exception ignored) {
-        return new ErrorResponse("Invalid request!");
+    public ErrorResponse handleValidationException(final Exception e) {
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler

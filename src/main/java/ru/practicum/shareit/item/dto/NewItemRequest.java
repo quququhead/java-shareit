@@ -12,6 +12,6 @@ public class NewItemRequest {
     @NotBlank(message = "Description cannot be null, empty or blank!")
     private String description;
 
-    @NotNull
+    @NotNull(message = "Available cannot be null!")
     private Boolean available;
 }
