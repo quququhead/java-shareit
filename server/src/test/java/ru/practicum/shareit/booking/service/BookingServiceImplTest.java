@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -47,7 +49,7 @@ class BookingServiceImplTest {
     private ArgumentCaptor<Booking> argumentCaptor;
 
     @Test
-    void findAllBookingsOfUser() {
+    void findAllBookingsOfUserWithStatusAll() {
         long userId = 0L;
         BookingState state = BookingState.ALL;
 
@@ -81,6 +83,195 @@ class BookingServiceImplTest {
         assertNotNull(bookingDtoList);
         assertEquals(1, bookingDtoList.size());
         verify(bookingRepository).findByBookerIdOrderByStart(userId);
+    }
+
+    @Test
+    void findAllBookingsOfUserWithStatusWaiting() {
+        long userId = 0L;
+        BookingState state = BookingState.WAITING;
+
+        User user = new User();
+        user.setId(userId);
+        user.setName("Gleb");
+        user.setEmail("bossshelby@yandex.ru");
+
+        Item item = new Item();
+        item.setId(0L);
+        item.setName("Name");
+        item.setDescription("Description");
+        item.setAvailable(true);
+        item.setOwner(user);
+        item.setItemRequest(null);
+        item.setComments(List.of());
+
+        Booking booking = new Booking();
+        booking.setId(0L);
+        booking.setStart(LocalDateTime.of(2024, 12, 30, 12, 0, 0));
+        booking.setEnd(LocalDateTime.of(2024, 12, 31, 12, 0, 0));
+        booking.setItem(item);
+        booking.setBooker(user);
+        booking.setStatus(BookingStatus.WAITING);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(bookingRepository.findByBookerIdAndStatusOrderByStart(userId, BookingStatus.WAITING)).thenReturn(List.of(booking));
+
+        List<BookingDto> bookingDtoList = bookingService.findAllBookingsOfUser(userId, state);
+
+        assertNotNull(bookingDtoList);
+        assertEquals(1, bookingDtoList.size());
+        verify(bookingRepository).findByBookerIdAndStatusOrderByStart(userId, BookingStatus.WAITING);
+
+    }
+
+    @Test
+    void findAllBookingsOfUserWithStatusCurrent() {
+        long userId = 0L;
+        BookingState state = BookingState.CURRENT;
+
+        User user = new User();
+        user.setId(userId);
+        user.setName("Gleb");
+        user.setEmail("bossshelby@yandex.ru");
+
+        Item item = new Item();
+        item.setId(0L);
+        item.setName("Name");
+        item.setDescription("Description");
+        item.setAvailable(true);
+        item.setOwner(user);
+        item.setItemRequest(null);
+        item.setComments(List.of());
+
+        Booking booking = new Booking();
+        booking.setId(0L);
+        booking.setStart(LocalDateTime.of(2024, 12, 30, 12, 0, 0));
+        booking.setEnd(LocalDateTime.of(2024, 12, 31, 12, 0, 0));
+        booking.setItem(item);
+        booking.setBooker(user);
+        booking.setStatus(BookingStatus.APPROVED);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(bookingRepository.findByBookerIdAndStartBeforeAndEndAfterOrderByStart(eq(userId), any(), any())).thenReturn(List.of(booking));
+
+        List<BookingDto> bookingDtoList = bookingService.findAllBookingsOfUser(userId, state);
+
+        assertNotNull(bookingDtoList);
+        assertEquals(1, bookingDtoList.size());
+        verify(bookingRepository).findByBookerIdAndStartBeforeAndEndAfterOrderByStart(eq(userId), any(), any());
+
+    }
+
+    @Test
+    void findAllBookingsOfUserWithStatusRejected() {
+        long userId = 0L;
+        BookingState state = BookingState.REJECTED;
+
+        User user = new User();
+        user.setId(userId);
+        user.setName("Gleb");
+        user.setEmail("bossshelby@yandex.ru");
+
+        Item item = new Item();
+        item.setId(0L);
+        item.setName("Name");
+        item.setDescription("Description");
+        item.setAvailable(true);
+        item.setOwner(user);
+        item.setItemRequest(null);
+        item.setComments(List.of());
+
+        Booking booking = new Booking();
+        booking.setId(0L);
+        booking.setStart(LocalDateTime.of(2024, 12, 30, 12, 0, 0));
+        booking.setEnd(LocalDateTime.of(2024, 12, 31, 12, 0, 0));
+        booking.setItem(item);
+        booking.setBooker(user);
+        booking.setStatus(BookingStatus.REJECTED);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(bookingRepository.findByBookerIdAndStatusOrBookerIdAndStatusOrderByStart(userId, BookingStatus.REJECTED, userId, BookingStatus.CANCELLED)).thenReturn(List.of(booking));
+
+        List<BookingDto> bookingDtoList = bookingService.findAllBookingsOfUser(userId, state);
+
+        assertNotNull(bookingDtoList);
+        assertEquals(1, bookingDtoList.size());
+        verify(bookingRepository).findByBookerIdAndStatusOrBookerIdAndStatusOrderByStart(userId, BookingStatus.REJECTED, userId, BookingStatus.CANCELLED);
+
+    }
+
+    @Test
+    void findAllBookingsOfUserWithStatusPast() {
+        long userId = 0L;
+        BookingState state = BookingState.PAST;
+
+        User user = new User();
+        user.setId(userId);
+        user.setName("Gleb");
+        user.setEmail("bossshelby@yandex.ru");
+
+        Item item = new Item();
+        item.setId(0L);
+        item.setName("Name");
+        item.setDescription("Description");
+        item.setAvailable(true);
+        item.setOwner(user);
+        item.setItemRequest(null);
+        item.setComments(List.of());
+
+        Booking booking = new Booking();
+        booking.setId(0L);
+        booking.setStart(LocalDateTime.of(2024, 12, 30, 12, 0, 0));
+        booking.setEnd(LocalDateTime.of(2024, 12, 31, 12, 0, 0));
+        booking.setItem(item);
+        booking.setBooker(user);
+        booking.setStatus(BookingStatus.APPROVED);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(bookingRepository.findByBookerIdAndEndBeforeOrderByStart(eq(userId), any())).thenReturn(List.of(booking));
+
+        List<BookingDto> bookingDtoList = bookingService.findAllBookingsOfUser(userId, state);
+
+        assertNotNull(bookingDtoList);
+        assertEquals(1, bookingDtoList.size());
+        verify(bookingRepository).findByBookerIdAndEndBeforeOrderByStart(eq(userId), any());
+
+    }
+
+    @Test
+    void findAllBookingsOfUserWithStatusFuture() {
+        long userId = 0L;
+        BookingState state = BookingState.FUTURE;
+
+        User user = new User();
+        user.setId(userId);
+        user.setName("Gleb");
+        user.setEmail("bossshelby@yandex.ru");
+
+        Item item = new Item();
+        item.setId(0L);
+        item.setName("Name");
+        item.setDescription("Description");
+        item.setAvailable(true);
+        item.setOwner(user);
+        item.setItemRequest(null);
+        item.setComments(List.of());
+
+        Booking booking = new Booking();
+        booking.setId(0L);
+        booking.setStart(LocalDateTime.of(2024, 12, 30, 12, 0, 0));
+        booking.setEnd(LocalDateTime.of(2024, 12, 31, 12, 0, 0));
+        booking.setItem(item);
+        booking.setBooker(user);
+        booking.setStatus(BookingStatus.APPROVED);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(bookingRepository.findByBookerIdAndStartAfterOrderByStart(eq(userId), any())).thenReturn(List.of(booking));
+
+        List<BookingDto> bookingDtoList = bookingService.findAllBookingsOfUser(userId, state);
+
+        assertNotNull(bookingDtoList);
+        assertEquals(1, bookingDtoList.size());
+        verify(bookingRepository).findByBookerIdAndStartAfterOrderByStart(eq(userId), any());
 
     }
 
@@ -158,7 +349,7 @@ class BookingServiceImplTest {
     }
 
     @Test
-    void findAllBookingsForOwner() {
+    void findAllBookingsForOwnerWithStatusAll() {
         long userId = 0L;
         BookingState state = BookingState.ALL;
 
@@ -192,6 +383,196 @@ class BookingServiceImplTest {
         assertNotNull(bookingDtoList);
         assertEquals(1, bookingDtoList.size());
         verify(bookingRepository).findByItem_OwnerIdOrderByStart(userId);
+
+    }
+
+    @Test
+    void findAllBookingsForOwnerWithStatusWaiting() {
+        long userId = 0L;
+        BookingState state = BookingState.WAITING;
+
+        User user = new User();
+        user.setId(userId);
+        user.setName("Gleb");
+        user.setEmail("bossshelby@yandex.ru");
+
+        Item item = new Item();
+        item.setId(0L);
+        item.setName("Name");
+        item.setDescription("Description");
+        item.setAvailable(true);
+        item.setOwner(user);
+        item.setItemRequest(null);
+        item.setComments(List.of());
+
+        Booking booking = new Booking();
+        booking.setId(0L);
+        booking.setStart(LocalDateTime.of(2024, 12, 30, 12, 0, 0));
+        booking.setEnd(LocalDateTime.of(2024, 12, 31, 12, 0, 0));
+        booking.setItem(item);
+        booking.setBooker(user);
+        booking.setStatus(BookingStatus.WAITING);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(bookingRepository.findByItem_OwnerIdAndStatusOrderByStart(userId, BookingStatus.WAITING)).thenReturn(List.of(booking));
+
+        List<BookingDto> bookingDtoList = bookingService.findAllBookingsForOwner(userId, state);
+
+        assertNotNull(bookingDtoList);
+        assertEquals(1, bookingDtoList.size());
+        verify(bookingRepository).findByItem_OwnerIdAndStatusOrderByStart(userId, BookingStatus.WAITING);
+
+    }
+
+    @Test
+    void findAllBookingsForOwnerWithStatusCurrent() {
+        long userId = 0L;
+        BookingState state = BookingState.CURRENT;
+
+        User user = new User();
+        user.setId(userId);
+        user.setName("Gleb");
+        user.setEmail("bossshelby@yandex.ru");
+
+        Item item = new Item();
+        item.setId(0L);
+        item.setName("Name");
+        item.setDescription("Description");
+        item.setAvailable(true);
+        item.setOwner(user);
+        item.setItemRequest(null);
+        item.setComments(List.of());
+
+        Booking booking = new Booking();
+        booking.setId(0L);
+        booking.setStart(LocalDateTime.of(2024, 12, 30, 12, 0, 0));
+        booking.setEnd(LocalDateTime.of(2024, 12, 31, 12, 0, 0));
+        booking.setItem(item);
+        booking.setBooker(user);
+        booking.setStatus(BookingStatus.APPROVED);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(bookingRepository.findByItem_OwnerIdAndStartBeforeAndEndAfterOrderByStart(eq(userId), any(), any())).thenReturn(List.of(booking));
+
+        List<BookingDto> bookingDtoList = bookingService.findAllBookingsForOwner(userId, state);
+
+        assertNotNull(bookingDtoList);
+        assertEquals(1, bookingDtoList.size());
+        verify(bookingRepository).findByItem_OwnerIdAndStartBeforeAndEndAfterOrderByStart(eq(userId), any(), any());
+
+    }
+
+    @Test
+    void findAllBookingsForOwnerWithStatusRejected() {
+        long userId = 0L;
+        BookingState state = BookingState.REJECTED;
+
+        User user = new User();
+        user.setId(userId);
+        user.setName("Gleb");
+        user.setEmail("bossshelby@yandex.ru");
+
+        Item item = new Item();
+        item.setId(0L);
+        item.setName("Name");
+        item.setDescription("Description");
+        item.setAvailable(true);
+        item.setOwner(user);
+        item.setItemRequest(null);
+        item.setComments(List.of());
+
+        Booking booking = new Booking();
+        booking.setId(0L);
+        booking.setStart(LocalDateTime.of(2024, 12, 30, 12, 0, 0));
+        booking.setEnd(LocalDateTime.of(2024, 12, 31, 12, 0, 0));
+        booking.setItem(item);
+        booking.setBooker(user);
+        booking.setStatus(BookingStatus.REJECTED);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(bookingRepository.findByItem_OwnerIdAndStatusOrItem_OwnerIdAndStatusOrderByStart(userId, BookingStatus.REJECTED, userId, BookingStatus.CANCELLED)).thenReturn(List.of(booking));
+
+        List<BookingDto> bookingDtoList = bookingService.findAllBookingsForOwner(userId, state);
+
+        assertNotNull(bookingDtoList);
+        assertEquals(1, bookingDtoList.size());
+        verify(bookingRepository).findByItem_OwnerIdAndStatusOrItem_OwnerIdAndStatusOrderByStart(userId, BookingStatus.REJECTED, userId, BookingStatus.CANCELLED);
+
+    }
+
+    @Test
+    void findAllBookingsForOwnerWithStatusPast() {
+        long userId = 0L;
+        BookingState state = BookingState.PAST;
+
+        User user = new User();
+        user.setId(userId);
+        user.setName("Gleb");
+        user.setEmail("bossshelby@yandex.ru");
+
+        Item item = new Item();
+        item.setId(0L);
+        item.setName("Name");
+        item.setDescription("Description");
+        item.setAvailable(true);
+        item.setOwner(user);
+        item.setItemRequest(null);
+        item.setComments(List.of());
+
+        Booking booking = new Booking();
+        booking.setId(0L);
+        booking.setStart(LocalDateTime.of(2024, 12, 30, 12, 0, 0));
+        booking.setEnd(LocalDateTime.of(2024, 12, 31, 12, 0, 0));
+        booking.setItem(item);
+        booking.setBooker(user);
+        booking.setStatus(BookingStatus.WAITING);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(bookingRepository.findByItem_OwnerIdAndEndBeforeOrderByStart(eq(userId), any())).thenReturn(List.of(booking));
+
+        List<BookingDto> bookingDtoList = bookingService.findAllBookingsForOwner(userId, state);
+
+        assertNotNull(bookingDtoList);
+        assertEquals(1, bookingDtoList.size());
+        verify(bookingRepository).findByItem_OwnerIdAndEndBeforeOrderByStart(eq(userId), any());
+
+    }
+
+    @Test
+    void findAllBookingsForOwnerWithStatusFuture() {
+        long userId = 0L;
+        BookingState state = BookingState.FUTURE;
+
+        User user = new User();
+        user.setId(userId);
+        user.setName("Gleb");
+        user.setEmail("bossshelby@yandex.ru");
+
+        Item item = new Item();
+        item.setId(0L);
+        item.setName("Name");
+        item.setDescription("Description");
+        item.setAvailable(true);
+        item.setOwner(user);
+        item.setItemRequest(null);
+        item.setComments(List.of());
+
+        Booking booking = new Booking();
+        booking.setId(0L);
+        booking.setStart(LocalDateTime.of(2024, 12, 30, 12, 0, 0));
+        booking.setEnd(LocalDateTime.of(2024, 12, 31, 12, 0, 0));
+        booking.setItem(item);
+        booking.setBooker(user);
+        booking.setStatus(BookingStatus.WAITING);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(bookingRepository.findByItem_OwnerIdAndStartAfterOrderByStart(eq(userId), any())).thenReturn(List.of(booking));
+
+        List<BookingDto> bookingDtoList = bookingService.findAllBookingsForOwner(userId, state);
+
+        assertNotNull(bookingDtoList);
+        assertEquals(1, bookingDtoList.size());
+        verify(bookingRepository).findByItem_OwnerIdAndStartAfterOrderByStart(eq(userId), any());
 
     }
 

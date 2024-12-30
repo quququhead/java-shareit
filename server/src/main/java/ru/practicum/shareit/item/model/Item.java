@@ -41,16 +41,6 @@ public class Item {
     @OneToMany(mappedBy = "item")
     private List<Comment> comments = new ArrayList<>();
 
-    public void addComment(Comment comment) {
-        comments.add(comment);
-        comment.setItem(this);
-    }
-
-    public void removeComment(Comment comment) {
-        comments.remove(comment);
-        comment.setItem(null);
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

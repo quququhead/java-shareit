@@ -20,6 +20,7 @@ import ru.practicum.shareit.user.model.User;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -143,7 +144,7 @@ class ItemServiceImplTest {
     }
 
     @Test
-    void createItem() {
+    void createItemWithoutRequest() {
         long userId = 0L;
         ItemRequest itemRequest = new ItemRequest();
         itemRequest.setName("Name");
@@ -166,6 +167,50 @@ class ItemServiceImplTest {
         item.setComments(List.of());
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(itemRepository.save(item)).thenReturn(item);
+
+        ItemDto itemDto = itemService.createItem(userId, itemRequest);
+
+        assertEquals(item.getId(), itemDto.getId());
+        verify(itemRepository).save(item);
+    }
+
+    @Test
+    void createItemWithRequest() {
+        long userId = 0L;
+        ItemRequest itemRequest = new ItemRequest();
+        itemRequest.setName("Name");
+        itemRequest.setDescription("Description");
+        itemRequest.setAvailable(true);
+        itemRequest.setRequestId(0L);
+
+        User user = new User();
+        user.setId(userId);
+        user.setName("Gleb");
+        user.setEmail("bossshelby@yandex.ru");
+
+        User oneMoreUser = new User();
+        user.setId(1L);
+        user.setName("quhead");
+        user.setEmail("shelbyboss@yandex.ru");
+
+        Item item = new Item();
+        item.setId(0L);
+        item.setName("Name");
+        item.setDescription("Description");
+        item.setAvailable(true);
+        item.setOwner(user);
+        item.setItemRequest(null);
+        item.setComments(List.of());
+
+        ru.practicum.shareit.request.model.ItemRequest requestForItem = new ru.practicum.shareit.request.model.ItemRequest();
+        requestForItem.setId(0L);
+        requestForItem.setDescription("Description");
+        requestForItem.setAuthor(oneMoreUser);
+        requestForItem.setCreated(LocalDateTime.of(2024, 12, 30, 12, 0, 0));
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(itemRequestRepository.findById(itemRequest.getRequestId())).thenReturn(Optional.of(requestForItem));
         when(itemRepository.save(item)).thenReturn(item);
 
         ItemDto itemDto = itemService.createItem(userId, itemRequest);

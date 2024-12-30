@@ -40,11 +40,6 @@ public class ItemRequest {
         item.setItemRequest(this);
     }
 
-    public void removeComment(Item item) {
-        items.remove(item);
-        item.setItemRequest(null);
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
