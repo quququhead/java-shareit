@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class BookingControllerTest {
 
     @Mock
-    private BookingService bookingService;;
+    private BookingService bookingService;
 
     @InjectMocks
     private BookingController bookingController;
