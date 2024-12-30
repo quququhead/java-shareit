@@ -48,7 +48,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemWithDatesDto findItem(long userId, long itemId) {
-        log.debug("findItem {}", itemId);
+        log.debug("{} findItem {}", userId, itemId);
         receiveUser(userId);
         LocalDateTime now = LocalDateTime.now();
         Booking lastBooking = bookingRepository.findFirstByItemIdAndStatusAndStartAfterOrderByStartDesc(itemId, BookingStatus.APPROVED, now);
@@ -58,7 +58,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Collection<ItemDto> findItemByText(long userId, String text) {
-        log.debug("findItemByText {}", text);
+        log.debug("{} findItemByText {}", userId, text);
         receiveUser(userId);
         if (text.isBlank()) {
             return List.of();
@@ -73,8 +73,11 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto createItem(long userId, ItemRequest itemRequest) {
         log.debug("{} createItem {}", userId, itemRequest);
         User user = receiveUser(userId);
+        Item item = ItemMapper.mapToItem(user, itemRequest);
         ru.practicum.shareit.request.model.ItemRequest requestForItem = recieveItemRequest(itemRequest.getRequestId());
-        Item item = ItemMapper.mapToItem(user, itemRequest, requestForItem);
+        if (requestForItem != null) {
+            requestForItem.addItem(item);
+        }
         return ItemMapper.mapToItemDto(itemRepository.save(item));
     }
 
@@ -95,7 +98,7 @@ public class ItemServiceImpl implements ItemService {
         User user = receiveUser(userId);
         Item item = receiveItem(itemId);
         if (item.getOwner().equals(user)) {
-            return ItemMapper.mapToItemDto(ItemMapper.updateItemFields(item, itemRequest));
+            return ItemMapper.mapToItemDto(itemRepository.save(ItemMapper.updateItemFields(item, itemRequest)));
         }
         throw new NoSuchElementException("You do not have such permission!");
     }

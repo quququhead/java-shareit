@@ -32,9 +32,18 @@ public class ItemRequest {
     @Column(name = "created", nullable = false)
     private LocalDateTime created;
 
-    @OneToMany
-    @JoinColumn(name = "request_id")
+    @OneToMany(mappedBy = "itemRequest")
     private List<Item> items = new ArrayList<>();
+
+    public void addItem(Item item) {
+        items.add(item);
+        item.setItemRequest(this);
+    }
+
+    public void removeComment(Item item) {
+        items.remove(item);
+        item.setItemRequest(null);
+    }
 
     @Override
     public boolean equals(Object o) {

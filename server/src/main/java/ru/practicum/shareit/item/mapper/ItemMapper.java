@@ -12,13 +12,12 @@ import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ItemMapper {
-    public static Item mapToItem(User user, ItemRequest request, ru.practicum.shareit.request.model.ItemRequest requestForItem) {
+    public static Item mapToItem(User user, ItemRequest request) {
         Item item = new Item();
         item.setName(request.getName());
         item.setDescription(request.getDescription());
         item.setAvailable(request.getAvailable());
         item.setOwner(user);
-        item.setRequestId(requestForItem.getId());
         return item;
     }
 
