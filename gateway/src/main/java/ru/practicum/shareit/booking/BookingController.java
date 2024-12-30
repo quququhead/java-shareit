@@ -49,7 +49,7 @@ public class BookingController {
         log.info("CreateBooking {}, userId={}", bookingRequest, userId);
         if (bookingRequest.getStart().isEqual(bookingRequest.getEnd()) || bookingRequest.getStart().isAfter(bookingRequest.getEnd())) {
             throw new ValidationException("Start and end cannot be the same," +
-                    " and start must be before end!");
+                    " and start must be before end");
         }
         return bookingClient.createBooking(userId, bookingRequest);
     }
