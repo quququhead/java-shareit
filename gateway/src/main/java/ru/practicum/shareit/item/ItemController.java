@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +33,7 @@ public class ItemController {
 
     @GetMapping("/search")
     public ResponseEntity<Object> findItemByText(@RequestHeader("X-Sharer-User-Id") long userId,
-                                                 @RequestParam @NonNull String text) {
+                                                 @RequestParam @NotBlank String text) {
         log.info("FindItemByText {}", text);
         return itemClient.findItemByText(userId, text);
     }
