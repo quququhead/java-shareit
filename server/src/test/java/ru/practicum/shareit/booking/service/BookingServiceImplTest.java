@@ -14,6 +14,7 @@ import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.model.BookingStatus;
+import ru.practicum.shareit.exception.PermissionDeniedException;
 import ru.practicum.shareit.item.dal.ItemRepository;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.dal.UserRepository;
@@ -21,6 +22,7 @@ import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -116,6 +118,44 @@ class BookingServiceImplTest {
         BookingDto bookingDto = bookingService.findBooking(userId, bookingId);
 
         assertEquals(bookingId, bookingDto.getId());
+    }
+
+    @Test
+    void findBookingWithException() {
+        long userId = 0L;
+        long bookingId = 0L;
+
+        User user = new User();
+        user.setId(userId);
+        user.setName("Gleb");
+        user.setEmail("bossshelby@yandex.ru");
+
+        User oneMoreUser = new User();
+        user.setId(1L);
+        user.setName("quhead");
+        user.setEmail("shelbyboss@yandex.ru");
+
+        Item item = new Item();
+        item.setId(0L);
+        item.setName("Name");
+        item.setDescription("Description");
+        item.setAvailable(true);
+        item.setOwner(oneMoreUser);
+        item.setItemRequest(null);
+        item.setComments(List.of());
+
+        Booking booking = new Booking();
+        booking.setId(bookingId);
+        booking.setStart(LocalDateTime.of(2024, 12, 30, 12, 0, 0));
+        booking.setEnd(LocalDateTime.of(2024, 12, 31, 12, 0, 0));
+        booking.setItem(item);
+        booking.setBooker(oneMoreUser);
+        booking.setStatus(BookingStatus.WAITING);
+
+        when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+        when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(booking));
+
+        assertThrows(PermissionDeniedException.class, () -> bookingService.findBooking(userId, bookingId));
     }
 
     @Test
