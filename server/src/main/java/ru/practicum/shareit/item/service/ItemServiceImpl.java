@@ -21,7 +21,6 @@ import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
@@ -60,9 +59,6 @@ public class ItemServiceImpl implements ItemService {
     public Collection<ItemDto> findItemByText(long userId, String text) {
         log.debug("{} findItemByText {}", userId, text);
         receiveUser(userId);
-        if (text.isBlank()) {
-            return List.of();
-        }
         return itemRepository.findByNameIgnoreCaseContainingAndAvailableTrueOrDescriptionIgnoreCaseContainingAndAvailableTrue(text, text)
                 .stream()
                 .map(ItemMapper::mapToItemDto)

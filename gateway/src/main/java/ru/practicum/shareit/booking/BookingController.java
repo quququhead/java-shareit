@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking;
 
 import jakarta.validation.Valid;
+import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -46,6 +47,10 @@ public class BookingController {
     public ResponseEntity<Object> createBooking(@RequestHeader("X-Sharer-User-Id") long userId,
                                                 @Valid @RequestBody NewBookingRequest bookingRequest) {
         log.info("CreateBooking {}, userId={}", bookingRequest, userId);
+        if (bookingRequest.getStart().isEqual(bookingRequest.getEnd()) || bookingRequest.getStart().isAfter(bookingRequest.getEnd())) {
+            throw new ValidationException("Start and end cannot be the same," +
+                    " and start must be before end!");
+        }
         return bookingClient.createBooking(userId, bookingRequest);
     }
 

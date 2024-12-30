@@ -93,10 +93,6 @@ public class BookingServiceImpl implements BookingService {
     @Override
     public BookingDto createBooking(long userId, BookingRequest bookingDto) {
         log.debug("{} createBooking {}", userId, bookingDto);
-        if (bookingDto.getStart().isEqual(bookingDto.getEnd()) || bookingDto.getStart().isAfter(bookingDto.getEnd())) {
-            throw new PermissionDeniedException("Start and end cannot be the same," +
-                    " and start must be before end!");
-        }
         User user = receiveUser(userId);
         Item item = receiveItem(bookingDto.getItemId());
         return BookingMapper.mapToBookingDto(bookingRepository.save(BookingMapper.mapToBooking(user, item, bookingDto)));
